@@ -25,6 +25,7 @@ resource "aws_security_group" "nginx_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  vpc_id = var.vpc_id
 }
 
 resource "aws_instance" "nginx" {
@@ -41,4 +42,5 @@ resource "aws_instance" "nginx" {
   tags = {
     Name = "terraform-nginx"
   }
+  subnet_id = var.subnet_id[0]
 }
