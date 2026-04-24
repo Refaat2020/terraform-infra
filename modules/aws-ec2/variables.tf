@@ -3,7 +3,7 @@ variable "instance_type" {
   default = "t3.micro"
 }
 
-variable "subnet_id" {
+variable "private_subnet_ids" {
   type = list(string)
 }
 
@@ -11,4 +11,8 @@ variable "vpc_id" {
   type = string
   description = "VPC ID where resources will be created"
 
+}
+
+variable "alb_sg_id" {
+  type = string
 }

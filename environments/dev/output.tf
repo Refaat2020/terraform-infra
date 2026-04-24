@@ -13,3 +13,8 @@ output "instance_public_ip" {
   description = "EC2 public IP"
   value = module.ec2.instance_public_ip
 }
+
+output "alb_dns" {
+  description = "EC2 public IP"
+  value = module.alb.alb_dns
+}

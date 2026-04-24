@@ -21,17 +21,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-# resource "aws_subnet" "private" {
-#   vpc_id = aws_vpc.main.id
-#   count = var.private_subnet_count
-#   cidr_block = element(var.private_subnet_cidrs,count.index)
-#   availability_zone = element(var.availability_zones,count.index)
-
-#    tags = {
-#     Name = "private-subnet-${count.index +1}"
-#   }
-# }
-
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
@@ -58,4 +47,62 @@ resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
+
+///PRIVATE
+
+resource "aws_subnet" "private" {
+  vpc_id = aws_vpc.main.id
+  count = var.private_subnet_count
+  cidr_block = element(var.private_subnet_cidrs,count.index)
+  availability_zone = element(var.availability_zones,count.index)
+
+   tags = {
+    Name = "private-subnet-${count.index +1}"
+  }
+}
+
+resource "aws_eip" "nat" {
+  count = var.private_subnet_count
+  domain = "vpc"
+  tags = {
+    Name = "net-eip-${count.index+1}"
+  }
+}
+
+resource "aws_nat_gateway" "main" {
+  count = var.private_subnet_count
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id = aws_subnet.public[count.index].id
+
+  tags = {
+    Name = "nat-${count.index+1}"
+  }
+  depends_on = [ aws_internet_gateway.main ]
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+  count = var.private_subnet_count
+
+  tags = {
+    Name = "Private-rt-${count.index+1}"
+  }
+}
+
+resource "aws_route" "private" {
+  count = var.private_subnet_count
+  
+  route_table_id = aws_route_table.private[count.index].id
+  nat_gateway_id = aws_nat_gateway.main[count.index].id
+  
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+resource "aws_route_table_association" "private" {
+  count = var.private_subnet_count
+
+  route_table_id = aws_route_table.private[count.index].id
+  subnet_id = aws_subnet.private[count.index].id
+}
+
 
