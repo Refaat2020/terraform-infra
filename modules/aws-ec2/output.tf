@@ -1,7 +1,7 @@
-output "instance_public_ip" {
-  value = aws_instance.nginx.public_ip
+output "asg_name" {
+  value = aws_autoscaling_group.nginx_asg.name
 }
 
-output "instance_id" {
-  value = aws_instance.nginx.id
+output "asg_arn" {
+  value = aws_autoscaling_group.nginx_asg.arn
 }

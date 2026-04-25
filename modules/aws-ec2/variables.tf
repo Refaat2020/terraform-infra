@@ -13,6 +13,16 @@ variable "vpc_id" {
 
 }
 
+variable "image_id" {
+  type = string
+  description = "instance image id"
+  default = "ami-098e39bafa7e7303d"
+}
+
 variable "alb_sg_id" {
+  type = string
+}
+
+variable "target_group_arn" {
   type = string
 }

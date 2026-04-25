@@ -22,24 +22,6 @@ resource "aws_security_group" "nginx_sg" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_instance" "nginx" {
-  ami = "ami-098e39bafa7e7303d"
-  instance_type = "t3.micro"
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
-  user_data = <<-EOF
-                #!/bin/bash
-                dnf update -y
-                dnf install -y nginx
-                systemctl start nginx
-                systemctl enable nginx
-                EOF
-  tags = {
-    Name = "terraform-nginx"
-  }
-  subnet_id = var.private_subnet_ids[0]
-  associate_public_ip_address = false
-  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
-}
 
 
 resource "aws_iam_role" "ssm_role" {
@@ -67,4 +49,49 @@ resource "aws_iam_role_policy_attachment" "ssn" {
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "ec2-ssm-profile"
   role = aws_iam_role.ssm_role.name
+}
+
+
+
+resource "aws_launch_template" "nginx" {
+  name_prefix = "nginx-template"
+  image_id = var.image_id
+  instance_type = var.instance_type
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ssm_profile.name
+  }  
+
+  vpc_security_group_ids = [ aws_security_group.nginx_sg.id ]
+  user_data = base64encode(<<-EOF
+              #!/bin/bash
+              dnf update -y
+              dnf install -y nginx
+              systemctl daemon-reexec
+              systemctl enable nginx
+              systemctl start nginx
+              EOF
+  )
+}
+
+resource "aws_autoscaling_group" "nginx_asg" {
+  desired_capacity = 2
+  max_size         = 3
+  min_size         = 1
+
+  vpc_zone_identifier = var.private_subnet_ids
+
+  launch_template {
+    id      = aws_launch_template.nginx.id
+    version = aws_launch_template.nginx.latest_version
+  }
+
+  target_group_arns         = [var.target_group_arn]
+  health_check_type         = "ELB"
+  health_check_grace_period = 120
+
+  tag {
+    key                 = "Name"
+    value               = "nginx-asg"
+    propagate_at_launch = true
+  }
 }
