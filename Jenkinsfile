@@ -10,7 +10,7 @@ pipeline {
         stage('Clone Repo') {
             steps {
                 git credentialsId: 'github-creds',
-                    url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git'
+                    url: 'https://github.com/Refaat2020/terraform-infra'
             }
         }
 
