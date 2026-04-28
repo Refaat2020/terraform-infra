@@ -4,6 +4,7 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
         ENV = 'dev'
+        TF_PLUGIN_CACHE_DIR = "/var/lib/jenkins/.terraform.d/plugin-cache"
     }
 
     stages {
@@ -35,4 +36,9 @@ pipeline {
             }
         }
     }
+    post {
+    always {
+        cleanWs()
+    }
+}
 }
