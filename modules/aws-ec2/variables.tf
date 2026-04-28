@@ -26,3 +26,7 @@ variable "alb_sg_id" {
 variable "target_group_arn" {
   type = string
 }
+
+variable "resource_label" {
+  type = string
+}

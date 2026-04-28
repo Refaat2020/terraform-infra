@@ -7,6 +7,4 @@ variable "public_subnet_ids" {
 }
 
 
-# variable "instance_id" {
-#   type = string
-# }
+variable "certificate_arn" {}

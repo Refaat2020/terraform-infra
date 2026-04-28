@@ -95,3 +95,33 @@ resource "aws_autoscaling_group" "nginx_asg" {
     propagate_at_launch = true
   }
 }
+
+
+# resource "aws_autoscaling_policy" "cpu_target" {
+#   name = "cpu-target-tracking"
+#   autoscaling_group_name = aws_autoscaling_group.nginx_asg.name
+
+#   policy_type = "TargetTrackingScaling"
+
+#   target_tracking_configuration {
+#     predefined_metric_specification {
+#       predefined_metric_type = "ASGAverageCPUUtilization"
+#     }
+#     target_value = 50.0
+#   }
+# }
+
+
+resource "aws_autoscaling_policy" "alb_request" {
+  name = "alb-requests-scaling"
+  autoscaling_group_name = aws_autoscaling_group.nginx_asg.name
+  policy_type = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ALBRequestCountPerTarget"
+      resource_label = var.resource_label
+    }
+    target_value = 50
+  }
+}
