@@ -3,60 +3,33 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
+        ENV = 'dev'
     }
 
     stages {
 
-        stage('Clone Repo') {
+        stage('Network') {
             steps {
-                git credentialsId: 'github-creds',
-                    url: 'https://github.com/Refaat2020/terraform-infra'
-            }
-        }
-
-        stage('Terraform Init (network)') {
-            steps {
-                dir('environments/dev/network') {
+                dir("environments/${ENV}/network") {
                     sh 'terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Apply (network)') {
-            steps {
-                dir('environments/dev/network') {
                     sh 'terraform apply -auto-approve'
                 }
             }
         }
 
-        stage('Terraform Init (compute)') {
+        stage('Compute') {
             steps {
-                dir('environments/dev/compute') {
+                dir("environments/${ENV}/compute") {
                     sh 'terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Apply (compute)') {
-            steps {
-                dir('environments/dev/compute') {
                     sh 'terraform apply -auto-approve'
                 }
             }
         }
 
-        stage('Terraform Init (dns)') {
+        stage('DNS') {
             steps {
-                dir('environments/dev/dns') {
+                dir("environments/${ENV}/dns") {
                     sh 'terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Apply (dns)') {
-            steps {
-                dir('environments/dev/dns') {
                     sh 'terraform apply -auto-approve'
                 }
             }
